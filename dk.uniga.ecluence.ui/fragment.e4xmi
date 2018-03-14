@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_BxaXACerEeWxCPrV0pAZQQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_EI7oACerEeWxCPrV0pAZQQ" featurename="descriptors" parentElementId="xpath:/">
+    <elements xsi:type="basic:PartDescriptor" xmi:id="_KMklcCerEeWxCPrV0pAZQQ" elementId="dk.uniga.ecluence.ui.parts.ConfluenceView" label="Confluence View" iconURI="platform:/plugin/dk.uniga.ecluence.ui/icons/Sample.png" tooltip="" category="Ecluence" contributionURI="bundleclass://dk.uniga.ecluence.ui/dk.uniga.ecluence.ui.parts.ConfluenceView">
+      <tags>View</tags>
+      <tags>categoryTag:Confluence</tags>
+      <menus xmi:id="_RE9fgKLxEeef3IYyqlO6rQ" elementId="dk.uniga.ecluence.ui.menu.viewmenu" label="View menu">
+        <tags>ViewMenu</tags>
+        <children xsi:type="menu:Menu" xmi:id="_0gQWIMF_Eee6uppr5MruSw" elementId="dk.uniga.ecluence.ui.menu.sites" label="Sites">
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_2yCvYMF7Eee6uppr5MruSw" elementId="dk.uniga.ecluence.ui.menuitem.sites" label="Sites" contributionURI="bundleclass://dk.uniga.ecluence.ui/dk.uniga.ecluence.ui.handlers.SitesMenu"/>
+        </children>
+        <children xsi:type="menu:DirectMenuItem" xmi:id="_U-t_UKLxEeef3IYyqlO6rQ" elementId="dk.uniga.ecluence.ui.menuitem.listpages" label="List pages in cache" contributionURI="bundleclass://dk.uniga.ecluence.ui/dk.uniga.ecluence.ui.handlers.ListPages"/>
+      </menus>
+      <toolbar xmi:id="_OvKpsKIpEeeuTNCmokKx0Q" elementId="dk.uniga.ecluence.ui.toolbar.ConfluenceToolbar">
+        <children xsi:type="menu:DirectToolItem" xmi:id="_UPnagKIpEeeuTNCmokKx0Q" elementId="dk.uniga.ecluence.ui.directtoolitem.refresh" accessibilityPhrase="" label="Refresh" iconURI="platform:/plugin/dk.uniga.ecluence.ui/icons/elcl16/refresh.png" tooltip="Refresh" contributionURI="bundleclass://dk.uniga.ecluence.ui/dk.uniga.ecluence.ui.handlers.RefreshAction"/>
+        <children xsi:type="menu:DirectToolItem" xmi:id="_P5uUcKM-Eeef3IYyqlO6rQ" elementId="dk.uniga.ecluence.ui.directtoolitem.linkselection" label="Link Selection" iconURI="platform:/plugin/dk.uniga.ecluence.ui/icons/elcl16/synced.png" tooltip="Link this view to the current selection" selected="true" type="Check" contributionURI="bundleclass://dk.uniga.ecluence.ui/dk.uniga.ecluence.ui.handlers.LinkSelectionAction"/>
+      </toolbar>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

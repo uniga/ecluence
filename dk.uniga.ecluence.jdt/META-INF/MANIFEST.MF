@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ecluence Java Development Tools Content Matching
+Bundle-SymbolicName: dk.uniga.ecluence.jdt;singleton:=true
+Bundle-Version: 1.0.4.qualifier
+Bundle-Activator: dk.uniga.ecluence.jdt.Activator
+Require-Bundle: dk.uniga.ecluence.core,
+ dk.uniga.ecluence.ui,
+ org.apache.commons.lang3,
+ org.eclipse.ant.core;bundle-version="3.5.0",
+ org.eclipse.ant.ui;bundle-version="3.7.0",
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ org.eclipse.jface;bundle-version="3.13.1",
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui;bundle-version="3.13.50",
+ org.eclipse.core.resources
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.jface.text,
+ org.eclipse.swt.custom,
+ org.eclipse.swt.widgets,
+ org.eclipse.ui,
+ org.slf4j
+Export-Package: dk.uniga.ecluence.jdt,
+ dk.uniga.ecluence.jdt.matching

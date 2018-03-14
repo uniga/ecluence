@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<!--
+    Copyright (c) 2017 Uniga.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+        Mikkel R. Jakobsen - initial API and implementation
+ -->
+
+<plugin>
+
+   <extension
+         id="dk.uniga.ecluence.ui.fragment"
+         point="org.eclipse.e4.workbench.model">
+      <fragment
+            apply="notexists"
+            uri="fragment.e4xmi">
+      </fragment>
+   </extension>
+   <extension
+         id="dk.uniga.ecluence.ui.preferences"
+         name="Ecluence"
+         point="org.eclipse.equinox.preferences.preferences">
+      <initializer class="dk.uniga.ecluence.ui.preferences.PreferenceInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="dk.uniga.ecluence.ui.preferences.EcluencePreferenceRoot"
+            id="dk.uniga.ecluence.ui.preferences.EcluencePreferenceRoot"
+            name="Ecluence">
+      </page>
+      <page
+            category="dk.uniga.ecluence.ui.preferences.EcluencePreferenceRoot"
+            class="dk.uniga.ecluence.ui.preferences.TemplatePreferencePage"
+            id="dk.uniga.ecluence.ui.preferences.TemplatePreferencePage"
+            name="Templates">
+      </page>
+      <page
+            category="dk.uniga.ecluence.ui.preferences.EcluencePreferenceRoot"
+            class="dk.uniga.ecluence.ui.preferences.MatcherPreferencePage"
+            id="dk.uniga.ecluence.ui.preferences.MatcherPreferencePage"
+            name="Content Matchers">
+      </page>
+   </extension>
+
+   <extension-point id="dk.uniga.ecluence.ui.editorSelectionAdapter" name="Editor selection adapter" schema="schema/dk.uniga.ecluence.ui.editorSelectionAdapter.exsd"/>
+   
+</plugin>

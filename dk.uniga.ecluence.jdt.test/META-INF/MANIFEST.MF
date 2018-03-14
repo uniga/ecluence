@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ecluence JDT Test
+Bundle-SymbolicName: dk.uniga.ecluence.jdt.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Uniga.dk
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: dk.uniga.ecluence.core,
+ dk.uniga.ecluence.jdt,
+ com.google.gson;bundle-version="2.7.0",
+ de.itboehmer.confluence-rest-client;bundle-version="0.8.3",
+ org.apache.commons.io,
+ org.objenesis;bundle-version="1.0.0",
+ org.eclipse.jdt.core,
+ org.junit;bundle-version="4.12.0",
+ org.eclipse.text;bundle-version="3.6.100",
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ org.apache.httpcomponents.httpclient;bundle-version="4.5.2",
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.6",
+ org.apache.commons.httpclient;bundle-version="3.1.0",
+ org.apache.commons.collections
+Import-Package: de.itboehmer.confluence.rest.client,
+ de.itboehmer.confluence.rest.core,
+ de.itboehmer.confluence.rest.core.domain,
+ de.itboehmer.confluence.rest.core.domain.content

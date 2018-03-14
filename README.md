@@ -30,7 +30,7 @@ Ecluence reacts to selections you make in the workspace (in the package explorer
 2. Add a label **code-context** to the page; this makes Ecluence cache the page.
 3. Add a label using one of the patterns in the table below to the page (replace example 'foo' and 'bar' terms with meaningful names).
 
-| Page with label | matches if <this> is selected in Eclipse |
+| Page with label | matches if (this) is selected in Eclipse |
 | --- | --- |
 | **code-class-prefix-foo**   | a Java class that has a name that begins with 'foo' (case insensitive) |
 | **code-class-suffix-bar**   | a Java class that has a name that ends with 'bar' (case insensitive) |

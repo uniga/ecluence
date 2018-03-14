@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="dk.uniga.ecluence.core.contentContribution">
+      <contentContribution>
+         <labelledContentCacheProvider
+               id="contentCodeContext"
+               type="context"
+               labels="code-context">
+         </labelledContentCacheProvider>
+         <contentMatcherProvider
+               className="dk.uniga.ecluence.jdt.matching.AntContentMatcherProvider"
+               contentCacheProviderId="contentCodeContext">
+         </contentMatcherProvider>
+         <contentMatcherProvider
+               className="dk.uniga.ecluence.jdt.matching.JavaContentMatcherProvider"
+               contentCacheProviderId="contentCodeContext">
+         </contentMatcherProvider>
+      </contentContribution>
+   </extension>
+   <extension
+         point="dk.uniga.ecluence.ui.editorSelectionAdapter">
+      <editorSelectionAdapter
+            className="dk.uniga.ecluence.jdt.JavaEditorSelectionAdapter">
+      </editorSelectionAdapter>
+   </extension>
+</plugin>

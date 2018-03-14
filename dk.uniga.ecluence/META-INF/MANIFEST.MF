@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ManifestVersion: 2
+Bundle-Name: Ecluence - Confluence content in Eclipse
+Bundle-SymbolicName: dk.uniga.ecluence;singleton:=true
+Bundle-Version: 1.0.4.qualifier
+Bundle-Vendor: Uniga
+Bundle-Localization: plugin
+Bundle-ActivationPolicy: lazy

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/dk.uniga.ecluence_1.0.0.qualifier.jar" id="dk.uniga.ecluence" version="1.0.0.qualifier">
+      <category name="dk.uniga.ecluence"/>
+   </feature>
+   <category-def name="dk.uniga.ecluence" label="Ecluence">
+      <description>
+         Confluence integration in Eclipse
+      </description>
+   </category-def>
+</site>
