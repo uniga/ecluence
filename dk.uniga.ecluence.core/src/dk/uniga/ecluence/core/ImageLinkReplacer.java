@@ -50,21 +50,31 @@ public class ImageLinkReplacer implements PageContentProcessor {
 		List<ImageLink> links = extractor.extractImageLinks(content);
 		String modified = content;
 		for (ImageLink link : links) {
-			try {
-				log.debug("replace {} with {} {}", link.getSrc(), link.getLinkedResourceId(),
-						link.getLinkedResourceDefaultAlias());
+			modified = replaceLink(modified, link);
+		}
+		return modified;
+	}
 
-				File file = imageStore.getFile(link.getLinkedResourceDefaultAlias());
+	private String replaceLink(String modified, ImageLink link) throws PageContentProcessingException {
+		try {
+			log.debug("replace {} with {} {}", link.getSrc(), link.getLinkedResourceId(),
+					link.getLinkedResourceDefaultAlias());
 
-				updateFile(file, link);
-				
-				if (file.exists()) {
-					modified = StringUtils.replace(modified, link.getSrc(), "file://" + file.getPath());
-					modified = StringUtils.replace(modified, link.getSrcset(), "file://" + file.getPath());
-				}
-			} catch (IOException e) {
-				throw new PageContentProcessingException(e);
+			File file = imageStore.getFile(link.getLinkedResourceDefaultAlias());
+
+			updateFile(file, link);
+			
+			if (file.exists()) {
+				modified = StringUtils.replace(modified, link.getSrc(), "file://" + file.getPath());
+				modified = StringUtils.replace(modified, link.getSrcset(), "file://" + file.getPath());
 			}
+			else {
+				// If we cannot read the linked file, the browser may likely choke so remove it
+				modified = StringUtils.replace(modified, link.getSrc(), "");
+				modified = StringUtils.replace(modified, link.getSrcset(), "");
+			}
+		} catch (IOException e) {
+			throw new PageContentProcessingException(e);
 		}
 		return modified;
 	}

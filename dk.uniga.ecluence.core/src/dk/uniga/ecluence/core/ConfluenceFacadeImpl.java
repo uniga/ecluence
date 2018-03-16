@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -151,10 +153,10 @@ public class ConfluenceFacadeImpl implements ConfluenceFacade {
 		return getConfluenceService().refreshCaches();
 	}
 
-	public InputStream getAttachment(String id) throws NotConnectedException, InterruptedException, ExecutionException {
+	public InputStream getAttachment(String id) throws NotConnectedException, InterruptedException, ExecutionException, TimeoutException {
 		AttachmentBean attachment = new AttachmentBean(id);
 		attachment.setTitle("title");
-		return getConfluenceService().getContentClient().downloadAttachement(attachment).get();
+		return getConfluenceService().getContentClient().downloadAttachement(attachment).get(3, TimeUnit.SECONDS);
 	}
 
 	@Override

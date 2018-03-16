@@ -15,11 +15,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,14 +143,20 @@ public final class PageBrowser {
 
 	private void loadPage(String contentId) {
 		log.debug("load page {}", contentId);
-		try {
-			ContentBean page = getConfluenceFacade().getPageById(contentId);
-			log.debug("page loaded {}", page);
-			if (page != null)
-				showPage(page);
-		} catch (QueryException e) {
-			Activator.handleError("Exception retrieving page " + contentId, e, false);
-		}
+		new Job("Loading page...") {
+			@Override
+			protected IStatus run(IProgressMonitor arg0) {
+				try {
+					ContentBean page = getConfluenceFacade().getPageById(contentId);
+					log.debug("page loaded {}", page);
+					if (page != null)
+						showPage(page);
+				} catch (QueryException e) {
+					Activator.handleError("Exception retrieving page " + contentId, e, false);
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 	}
 
 	private ConfluenceFacade getConfluenceFacade() {
@@ -159,8 +170,6 @@ public final class PageBrowser {
 	 * @param page
 	 */
 	void showPage(ContentBean page) {
-		if (browser.isDisposed())
-			return;
 		if (page != null && !page.equals(currentPage)) {
 			String content = new ContentFormatter(templateProvider).formatContent(page);
 			if (content != null) {
@@ -168,15 +177,29 @@ public final class PageBrowser {
 					try {
 						content = processor.process(content);
 					} catch (PageContentProcessingException e) {
+						// log error and continue using the content as is
 						Activator.handleError("Exception processing page content", e, false);
 					}
 				}
+				updateBrowser(content, page);
+			}
+		}
+	}
+
+	private void updateBrowser(String content, ContentBean page) {
+		if (browser.isDisposed())
+			return;
+		new UIJob("Loading page...") {
+			@Override
+			public IStatus runInUIThread(IProgressMonitor arg0) {
 				if (!content.equals(browser.getText())) {
+					log.debug("browser.setText");
 					browser.setText(content);
 				}
 				currentPage = page;
+				return Status.OK_STATUS;
 			}
-		}
+		}.schedule();
 	}
 
 	public void setFocus() {

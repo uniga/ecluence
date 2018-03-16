@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import de.itboehmer.confluence.rest.core.RestException;
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
@@ -84,8 +85,9 @@ public interface ConfluenceFacade {
 	 * @throws NotConnectedException if the facade is not connected to an API
 	 * @throws InterruptedException
 	 * @throws ExecutionException
+	 * @throws TimeoutException 
 	 */
-	InputStream getAttachment(String id) throws NotConnectedException, InterruptedException, ExecutionException;
+	InputStream getAttachment(String id) throws NotConnectedException, InterruptedException, ExecutionException, TimeoutException;
 
 	/**
 	 * Adds a listener to be notified if content in a cache has been updated.

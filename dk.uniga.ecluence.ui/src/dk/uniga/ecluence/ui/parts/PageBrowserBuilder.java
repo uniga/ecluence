@@ -3,6 +3,7 @@ package dk.uniga.ecluence.ui.parts;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -81,9 +82,12 @@ public final class PageBrowserBuilder {
 
 	private InputStream getAttachment(String name) {
 		try {
+			// TODO: handle futures with delayed updating of the browser to show downloaded images
 			return getConfluenceFacade().getAttachment(name);
 		} catch (NotConnectedException | InterruptedException e) {
 			// Ignore because connection may have been closed while we read page
+			Activator.handleError("Cannot get attachment", e, false);
+		} catch (TimeoutException e) {
 			Activator.handleError("Cannot get attachment", e, false);
 		} catch (ExecutionException e) {
 			Activator.handleError("Cannot get attachment", e, true);
