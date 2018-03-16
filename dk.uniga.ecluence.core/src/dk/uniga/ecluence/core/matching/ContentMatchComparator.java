@@ -18,8 +18,13 @@ public class ContentMatchComparator implements Comparator<ContentMatch> {
 	public int compare(ContentMatch o1, ContentMatch o2) {
 		int compareByRank = o1.getRank().compareTo(o2.getRank());
 		if (compareByRank == 0)
-			return o1.getExplanation().getDefaultText().compareTo(o2.getExplanation().getDefaultText());
+			// For equally ranked pages, compare on title and id
+			return getTitle(o1).compareTo(getTitle(o2));
 		return compareByRank;
+	}
+
+	private String getTitle(ContentMatch o1) {
+		return String.format("%s %s", o1.getContent().getTitle(), o1.getContent().getId());
 	}
 
 }
