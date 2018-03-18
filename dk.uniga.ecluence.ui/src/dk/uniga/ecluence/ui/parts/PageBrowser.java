@@ -30,20 +30,17 @@ import org.slf4j.LoggerFactory;
 
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
 import dk.uniga.ecluence.core.ConfluenceFacade;
-import dk.uniga.ecluence.core.PageContentProcessingException;
-import dk.uniga.ecluence.core.PageContentProcessor;
+import dk.uniga.ecluence.core.PageContent;
+import dk.uniga.ecluence.core.PageContent.Listener;
 import dk.uniga.ecluence.core.QueryException;
 import dk.uniga.ecluence.ui.Activator;
-import dk.uniga.ecluence.ui.template.TemplateProvider;
 
 /**
  * Wrapper of a {@link Browser} component that can show pages using
- * {@link #showPage(ContentBean)}. Formats pages using a template from a given
- * TemplateProvider, processing pages with any registered content processors
- * ({@link #addContentProcessor(PageContentProcessor)}), and handles when links
- * are clicked, first checking with an internal handler that can load linked
- * pages and then any LinkHandler registered with
- * {@link #addLinkHandler(LinkHandler)}.
+ * {@link #showPage(ContentBean)}. Uses a PageContentRenderer to format and
+ * process content, and handles when links are clicked, first checking with an
+ * internal handler that can load linked pages and then any LinkHandler
+ * registered with {@link #addLinkHandler(LinkHandler)}.
  */
 public final class PageBrowser {
 
@@ -53,29 +50,31 @@ public final class PageBrowser {
 
 	private final Supplier<ConfluenceFacade> facadeSupplier;
 
-	private final TemplateProvider templateProvider;
-
-	private final List<PageContentProcessor> contentProcessors = new ArrayList<>();
+	private final PageContentRenderer pageRenderer;
 
 	private final List<LinkHandler> linkHandlers = new ArrayList<>();
 
-	private ContentBean currentPage;
+	private PageContent currentPage;
+	
+	private Object[] pageLock = new Object[0];
 
-	public PageBrowser(Composite parent, Supplier<ConfluenceFacade> facadeSupplier, TemplateProvider templateProvider) {
+	private Listener pageListener = new Listener() {
+		@Override
+		public void contentChanged(PageContent content) {
+			if (content.equals(currentPage)) {
+				updateBrowser(content);
+			}
+		}
+		@Override
+		public void closed(PageContent content) {
+		}
+	};
+
+	public PageBrowser(Composite parent, Supplier<ConfluenceFacade> facadeSupplier, PageContentRenderer renderer) {
 		this.facadeSupplier = facadeSupplier;
-		this.templateProvider = templateProvider;
+		this.pageRenderer = renderer;
 		this.browser = createBrowser(parent, SWT.NONE);
-		addLinkHandler(createPageLinkHandler());
-	}
-
-	/**
-	 * Adds a PageContentProcessor to process the content. Processors are called in
-	 * the order they have been added.
-	 * 
-	 * @param processor PageContentProcessor instance to process the content
-	 */
-	public void addContentProcessor(PageContentProcessor processor) {
-		contentProcessors.add(Objects.requireNonNull(processor));
+		addLinkHandler(this::handlePageLink);
 	}
 
 	/**
@@ -118,10 +117,6 @@ public final class PageBrowser {
 		return false;
 	}
 
-	private LinkHandler createPageLinkHandler() {
-		return (location) -> handlePageLink(location);
-	}
-
 	private boolean handlePageLink(String location) {
 		String pageId = LinkMatcher.matchPage(location);
 		log.debug("handlePageLink({}) pageId = {}", location, pageId);
@@ -147,8 +142,9 @@ public final class PageBrowser {
 			@Override
 			protected IStatus run(IProgressMonitor arg0) {
 				try {
+					log.debug("getPageById({})", contentId);
 					ContentBean page = getConfluenceFacade().getPageById(contentId);
-					log.debug("page loaded {}", page);
+					log.debug("page loaded {}", page.getId());
 					if (page != null)
 						showPage(page);
 				} catch (QueryException e) {
@@ -170,33 +166,37 @@ public final class PageBrowser {
 	 * @param page
 	 */
 	void showPage(ContentBean page) {
-		if (page != null && !page.equals(currentPage)) {
-			String content = new ContentFormatter(templateProvider).formatContent(page);
-			if (content != null) {
-				for (PageContentProcessor processor : contentProcessors) {
-					try {
-						content = processor.process(content);
-					} catch (PageContentProcessingException e) {
-						// log error and continue using the content as is
-						Activator.handleError("Exception processing page content", e, false);
-					}
-				}
-				updateBrowser(content, page);
+		synchronized (pageLock) {
+			log.debug("showPage({}) {}", page.getId(), page.getTitle());
+			if (page != null && !isSamePage(page)) {
+				PageContent rendered = pageRenderer.render(page);
+				setCurrentPage(rendered);
+				updateBrowser(rendered);
 			}
 		}
 	}
 
-	private void updateBrowser(String content, ContentBean page) {
-		if (browser.isDisposed())
-			return;
-		new UIJob("Loading page...") {
+	private boolean isSamePage(ContentBean page) {
+		return currentPage != null && page.equals(currentPage.getPage());
+	}
+
+	private void setCurrentPage(PageContent rendered) {
+		log.debug("setCurrentPage({})", rendered);
+		if (currentPage != null) {
+			currentPage.removeListener(pageListener);
+			currentPage.close();
+		}
+		currentPage = rendered;
+		currentPage.addListener(pageListener);
+	}
+	
+	private void updateBrowser(PageContent rendered) {
+		new UIJob("Showing page...") {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor arg0) {
-				if (!content.equals(browser.getText())) {
-					log.debug("browser.setText");
-					browser.setText(content);
-				}
-				currentPage = page;
+				if (browser.isDisposed())
+					return Status.OK_STATUS;
+				browser.setText(rendered.getContent());
 				return Status.OK_STATUS;
 			}
 		}.schedule();
@@ -205,5 +205,4 @@ public final class PageBrowser {
 	public void setFocus() {
 		browser.setFocus();
 	}
-
 }

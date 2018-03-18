@@ -1,9 +1,6 @@
 package dk.uniga.ecluence.ui.parts;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -13,10 +10,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.uniga.ecluence.core.AttachmentDownloader;
 import dk.uniga.ecluence.core.ConfluenceFacade;
 import dk.uniga.ecluence.core.ImageLinkReplacer;
 import dk.uniga.ecluence.core.ImageStore;
-import dk.uniga.ecluence.core.NotConnectedException;
 import dk.uniga.ecluence.ui.Activator;
 import dk.uniga.ecluence.ui.template.BuiltinTemplateProvider;
 import dk.uniga.ecluence.ui.template.ConfigurableTemplateProvider;
@@ -36,11 +33,18 @@ public final class PageBrowserBuilder {
 	}
 
 	public PageBrowser build(final Composite parent) {
-		PageBrowser browser = new PageBrowser(parent, facadeSupplier, createTemplateProvider());
-		addImageReplacer(browser);
-		addLinkifier(browser);
+		PageContentRenderer renderer = createPageContentRenderer();
+		PageBrowser browser = new PageBrowser(parent, facadeSupplier, renderer);
+		addLinkifier(browser, renderer);
 		addWikiLinkHandler(browser);
 		return browser;
+	}
+
+	private PageContentRenderer createPageContentRenderer() {
+		ContentFormatter formatter = new ContentFormatter(createTemplateProvider());
+		PageContentRenderer renderer = new PageContentRenderer(formatter);
+		addImageReplacer(renderer);
+		return renderer;
 	}
 
 	private TemplateProvider createTemplateProvider() {
@@ -51,20 +55,21 @@ public final class PageBrowserBuilder {
 		return dk.uniga.ecluence.ui.Activator.getDefault().getPreferenceStore();
 	}
 
-	private void addImageReplacer(PageBrowser browser) {
+	private void addImageReplacer(PageContentRenderer renderer) {
 		IPath stateLocation = Activator.getDefault().getStateLocation().addTrailingSeparator().append("imagecache");
 		try {
 			ImageStore imageStore = new ImageStore(stateLocation.toFile());
-			ImageLinkReplacer replacer = new ImageLinkReplacer((String name) -> getAttachment(name), imageStore);
-			browser.addContentProcessor(replacer);
+			AttachmentDownloader downloader = new AttachmentDownloaderImpl(facadeSupplier, imageStore);
+			ImageLinkReplacer replacer = new ImageLinkReplacer(downloader, imageStore);
+			renderer.addContentProcessor(replacer);
 		} catch (IOException e) {
 			Activator.handleError("Cannot store images locally", e, true);
 		}
 	}
 	
-	private void addLinkifier(PageBrowser browser) {
+	private void addLinkifier(PageBrowser browser, PageContentRenderer renderer) {
 		NameLinkifier linkifier = new NameLinkifier(browser.getComponent().getShell());
-		browser.addContentProcessor(linkifier);
+		renderer.addContentProcessor(linkifier);
 		browser.addLinkHandler(linkifier);
 	}
 	
@@ -78,25 +83,6 @@ public final class PageBrowserBuilder {
 			}
 			return false;
 		});
-	}
-
-	private InputStream getAttachment(String name) {
-		try {
-			// TODO: handle futures with delayed updating of the browser to show downloaded images
-			return getConfluenceFacade().getAttachment(name);
-		} catch (NotConnectedException | InterruptedException e) {
-			// Ignore because connection may have been closed while we read page
-			Activator.handleError("Cannot get attachment", e, false);
-		} catch (TimeoutException e) {
-			Activator.handleError("Cannot get attachment", e, false);
-		} catch (ExecutionException e) {
-			Activator.handleError("Cannot get attachment", e, true);
-		}
-		return null;
-	}
-
-	private ConfluenceFacade getConfluenceFacade() {
-		return facadeSupplier.get();
 	}
 
 }

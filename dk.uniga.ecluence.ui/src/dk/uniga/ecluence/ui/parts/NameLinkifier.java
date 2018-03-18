@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.widgets.Shell;
 
+import dk.uniga.ecluence.core.PageContent;
 import dk.uniga.ecluence.core.PageContentProcessor;
 
 public final class NameLinkifier implements PageContentProcessor, LinkHandler {
@@ -16,10 +17,11 @@ public final class NameLinkifier implements PageContentProcessor, LinkHandler {
 	}
 
 	@Override
-	public String process(String content) {
+	public void process(PageContent content) {
 		// This is a demonstration
 		// TODO implement a meaningful way of identifying resources
-		return StringUtils.replace(content, "ServiceEndpointProvider", linkify("ServiceEndpointProvider"));
+		String modified = StringUtils.replace(content.getContent(), "ServiceEndpointProvider", linkify("ServiceEndpointProvider"));
+		content.setContent(modified);
 	}
 	
 	private String linkify(String text) {

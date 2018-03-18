@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Future;
 
 import de.itboehmer.confluence.rest.core.RestException;
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
@@ -78,16 +77,13 @@ public interface ConfluenceFacade {
 	int refresh() throws NotConnectedException, QueryException, ContentStoreException;
 
 	/**
-	 * Returns an input stream for reading an attachment with a given id.
+	 * Returns a Future of an InputStream for reading an attachment with a given id.
 	 * 
 	 * @param id the id of the attachment
-	 * @return an InputStream for reading the attachment
+	 * @return Future for an InputStream for reading the attachment
 	 * @throws NotConnectedException if the facade is not connected to an API
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 * @throws TimeoutException 
 	 */
-	InputStream getAttachment(String id) throws NotConnectedException, InterruptedException, ExecutionException, TimeoutException;
+	Future<InputStream> getAttachment(String id) throws NotConnectedException;
 
 	/**
 	 * Adds a listener to be notified if content in a cache has been updated.

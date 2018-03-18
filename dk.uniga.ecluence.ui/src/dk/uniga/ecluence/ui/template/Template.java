@@ -11,16 +11,17 @@
 package dk.uniga.ecluence.ui.template;
 
 import java.net.URL;
+import java.util.Objects;
 
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
 
 public class Template {
 
-	private String text;
-	private URL iconUrl;
+	private final String text;
+	private final URL iconUrl;
 	
 	public Template(String text, URL iconUrl) {
-		this.text = text;
+		this.text = Objects.requireNonNull(text);
 		this.iconUrl = iconUrl;
 	}
 
