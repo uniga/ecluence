@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Confluence-rest-client
 Bundle-SymbolicName: de.itboehmer.confluence-rest-client
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.5.qualifier
 Bundle-ClassPath: .,
  confluence-rest-client-0.8.4-SNAPSHOT.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

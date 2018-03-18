@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecluence Java Development Tools Content Matching
 Bundle-SymbolicName: dk.uniga.ecluence.jdt;singleton:=true
-Bundle-Version: 1.0.4.qualifier
+Bundle-Version: 1.0.5.qualifier
 Bundle-Activator: dk.uniga.ecluence.jdt.Activator
 Require-Bundle: dk.uniga.ecluence.core,
  dk.uniga.ecluence.ui,
