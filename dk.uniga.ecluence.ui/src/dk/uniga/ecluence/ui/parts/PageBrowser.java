@@ -62,6 +62,7 @@ public final class PageBrowser {
 		@Override
 		public void contentChanged(PageContent content) {
 			if (content.equals(currentPage)) {
+				log.debug("contentChanged({}), updating browser", content.getKey());
 				updateBrowser(content);
 			}
 		}
@@ -181,7 +182,7 @@ public final class PageBrowser {
 	}
 
 	private void setCurrentPage(PageContent rendered) {
-		log.debug("setCurrentPage({})", rendered);
+		log.debug("setCurrentPage({})", rendered.getKey());
 		if (currentPage != null) {
 			currentPage.removeListener(pageListener);
 			currentPage.close();

@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * Downloads attachments to files asynchronously. Listeners are notified as jobs
+ * are completed.
+ */
 public interface AttachmentDownloader {
 
-	public void download(String name, File file);
+	void download(String name, File file);
 	
 	void cancel(String name);
 

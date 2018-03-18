@@ -248,7 +248,7 @@ public final class ConfluenceView {
 
 	private void updateMatches(Collection<ContentMatch> pages) {
 		updateList(pages);
-		showPage(pages);
+		showFirstMatch(pages);
 	}
 
 	private void updateList(final Collection<ContentMatch> matches) {
@@ -260,7 +260,7 @@ public final class ConfluenceView {
 		});
 	}
 
-	protected void showPage(final Collection<ContentMatch> matches) {
+	protected void showFirstMatch(final Collection<ContentMatch> matches) {
 		if (!matches.isEmpty()) {
 			showPageAsync(matches.iterator().next());
 		}

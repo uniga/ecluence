@@ -3,6 +3,7 @@ package dk.uniga.ecluence.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,7 +34,7 @@ public final class PageAttachmentProvider {
 	
 	private boolean closed;
 
-	private Listener listener = new Listener() {
+	private PageContent.Listener pageListener = new Listener() {
 		@Override
 		public void contentChanged(PageContent content) {
 		}
@@ -43,6 +44,8 @@ public final class PageAttachmentProvider {
 		}
 	};
 	
+	private AttachmentDownloader.Listener downloaderListener = jobs -> downloadsDone(jobs);
+	
 	private static Map<PageKey, PageAttachmentProvider> downloaders = new HashMap<>();
 	
 	public static PageAttachmentProvider get(AttachmentDownloader attachmentDownloader, PageContent content) {
@@ -51,6 +54,7 @@ public final class PageAttachmentProvider {
 			if (downloader == null) {
 				downloader = new PageAttachmentProvider(attachmentDownloader, content);
 				downloaders.put(content.getKey(), downloader);
+				log.debug("get({}), downloaders: {}", content.getKey(), downloaders.keySet());
 			}
 			return downloader;
 		}
@@ -58,37 +62,48 @@ public final class PageAttachmentProvider {
 	
 	private static void remove(PageContent content) {
 		downloaders.remove(content.getKey());
+		log.debug("remove({}), downloaders: {}", content.getKey(), downloaders.keySet());
 	}
 	
 	private PageAttachmentProvider(AttachmentDownloader attachmentDownloader, PageContent content) {
+		log.debug("constructor({})", content.getKey());
 		this.attachmentDownloader = attachmentDownloader;
 		this.content = content;
-		this.content.addListener(listener);
-		log.debug("instance({})", content.getKey());
-		attachmentDownloader.addListener(this::downloadsDone);
+		this.content.addListener(pageListener);
+		attachmentDownloader.addListener(downloaderListener);
 	}
 
 	private void downloadsDone(Collection<AttachmentJob> jobs) {
 		log.debug("downloadsDone({}) for {}", jobs, content.getKey());
-		replaceLinks(jobs);
-		attachmentDownloader.removeListener(this::downloadsDone);
-		remove(content);
+		if (!jobs.isEmpty())
+			replaceLinks(jobs);
+		for (AttachmentJob job : jobs) {
+			downloads.remove(job.getName());
+		}
+		removeIfDone();
 	}
 	
+	private void removeIfDone() {
+		if (downloads.isEmpty()) {
+			this.content.removeListener(pageListener);
+			attachmentDownloader.removeListener(downloaderListener);
+			remove(content);
+		}
+	}
+
 	private void cancel() {
 		log.debug("cancel {}", content.getKey());
 		for (Entry<String, File> entry : downloads.entrySet()) {
 			attachmentDownloader.cancel(entry.getKey());
 		}
-		attachmentDownloader.removeListener(this::downloadsDone);
-		remove(content);
+		downloads.clear();
+		removeIfDone();
 	}
 	
 	private void replaceLinks(Collection<AttachmentJob> jobs) {
 		String modified = content.getContent();
 		for (AttachmentJob job : jobs) {
 			modified = StringUtils.replace(modified, nameToPlaceholder(job.getName()), toFileLink(job.getFile()));
-			downloads.remove(job.getName());
 		}
 		content.setContent(modified);
 	}
@@ -131,7 +146,7 @@ public final class PageAttachmentProvider {
 	}
 	
 	private void fetchFile(String name, File file) throws IOException {
-		log.debug("fetchFile({}, {})", name, file);
+		log.debug("fetchFile({}, {})", name, file.getName());
 		attachmentDownloader.download(name, file);
 		downloads.put(name, file);
 	}
@@ -141,6 +156,8 @@ public final class PageAttachmentProvider {
 	 */
 	public void close() {
 		this.closed = true;
+		// If no downloads were started, we remove immediately
+		removeIfDone();
 	}
 
 }

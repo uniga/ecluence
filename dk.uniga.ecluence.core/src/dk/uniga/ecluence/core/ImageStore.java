@@ -17,12 +17,17 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ImageStore {
 
+	private static final Logger log = LoggerFactory.getLogger(ImageStore.class);
+	
 	private final File stateLocation;
 
 	public ImageStore(File location) throws IOException {
+		log.debug("initialize in location: {}", location);
 		this.stateLocation = location;
 		initializeLocation();
 	}

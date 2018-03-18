@@ -32,16 +32,15 @@ import dk.uniga.ecluence.core.ImageStore;
 import dk.uniga.ecluence.core.NotConnectedException;
 import dk.uniga.ecluence.ui.Activator;
 
-// Maybe introduce a "batch" of attachment that can be completed f.ex. for a given page
 public final class AttachmentDownloaderImpl implements AttachmentDownloader {
 	
 	private static final Logger log = LoggerFactory.getLogger(AttachmentDownloaderImpl.class);
 
 	private final Supplier<ConfluenceFacade> facadeSupplier;
 	private final ImageStore imageStore;
-	private ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-	private Collection<AttachmentJob> jobs = new ArrayList<>();
-	private Set<Listener> listeners = new HashSet<>();
+	private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+	private final Collection<AttachmentJob> jobs = new ArrayList<>();
+	private final Set<Listener> listeners = new HashSet<>();
 
 	private ScheduledFuture<?> future;
 	
@@ -83,11 +82,11 @@ public final class AttachmentDownloaderImpl implements AttachmentDownloader {
 	
 	@Override
 	public void download(String name, File file) {
-		log.debug("download({}, {})", name, file);
+		log.debug("download({}, {})", name, file.getName());
 		synchronized (jobs) {
 			jobs.add(new AttachmentJobImpl(name, file));
 			if (future == null) {
-				log.debug("start running completeJobs");
+				log.debug("schedule completeJobs");
 				future = this.executor.scheduleAtFixedRate(this::completeJobs, 1000, 1000, TimeUnit.MILLISECONDS);
 			}
 		}
@@ -96,11 +95,13 @@ public final class AttachmentDownloaderImpl implements AttachmentDownloader {
 	@Override
 	public void addListener(Listener listener) {
 		listeners.add(listener);
+		log.debug("addListener({}), listeners: {}", listener, listeners);
 	}
 	
 	@Override
 	public void removeListener(Listener listener) {
 		listeners.remove(listener);
+		log.debug("removeListener({}), remaining listeners: {}", listener, listeners);
 	}
 	
 	enum Status { Done, Failed, Waiting };
@@ -147,13 +148,13 @@ public final class AttachmentDownloaderImpl implements AttachmentDownloader {
 			// check if already complete
 			if (status == Status.Done || status == Status.Failed)
 				return true;
-			log.debug("checking if download complete: {} {}", name, file);
+			log.debug("checking if download complete: {} {}", name, file.getName());
 			if (attachment.isDone()) {
 				try {
 					imageStore.storeFile(file, attachment.get());
 					status = Status.Done;
 				} catch (InterruptedException | ExecutionException e) {
-					Activator.handleError("Could not download attachment " + file, e, false);
+					Activator.handleError("Could not download attachment " + file.getName(), e, false);
 					status = Status.Failed;
 					exception = e;
 				} catch (IOException e) {
