@@ -37,23 +37,27 @@ public class ContentFormatter {
 			"##LABELS##"
 	};
 
-	private Template template;
+	private TemplateProvider templateProvider;
 	
 	public ContentFormatter(TemplateProvider templateProvider) {
-		this.template = templateProvider.getTemplate();
+		this.templateProvider = templateProvider;
 	}
 
 	public String formatContent(ContentBean content) {
-		String page = StringUtils.replaceEach(template.getText(), PLACEHOLDERS, new String[] {
+		String page = StringUtils.replaceEach(getTemplate().getText(), PLACEHOLDERS, new String[] {
 				content.getTitle(),
 				content.getBody().getView().getValue(),
 				getAuthorLink(content),
 				getAuthorName(content),
-				template.getAuthorIconUrl(content),
+				getTemplate().getAuthorIconUrl(content),
 				getModified(content),
 				getLabels(content)
 		});
 		return page;
+	}
+
+	private Template getTemplate() {
+		return templateProvider.getTemplate();
 	}
 
 	private static DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)

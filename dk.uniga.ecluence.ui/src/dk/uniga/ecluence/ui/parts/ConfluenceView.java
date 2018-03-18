@@ -178,7 +178,7 @@ public final class ConfluenceView {
 	 */
 	@Inject
 	@Optional
-	private void cacheAdded(@UIEventTopic(EventConstants.PAGE_SELECTED) ContentBean page) {
+	private void pageSelected(@UIEventTopic(EventConstants.PAGE_SELECTED) ContentBean page) {
 		pageBrowser.showPage(page);
 	}
 	
@@ -267,6 +267,7 @@ public final class ConfluenceView {
 	}
 
 	private void showPageAsync(ContentMatch match) {
+		log.debug("showPageAsync {}", match);
 		synchronize.asyncExec(new Runnable() {
 			@Override
 			public void run() {
