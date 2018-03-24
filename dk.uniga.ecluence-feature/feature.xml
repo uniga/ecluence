@@ -12,7 +12,7 @@
 <feature
       id="dk.uniga.ecluence"
       label="Ecluence - Confluence content in Eclipse"
-      version="1.0.5.qualifier"
+      version="1.0.6.qualifier"
       provider-name="Uniga.dk"
       plugin="dk.uniga.ecluence">
 
