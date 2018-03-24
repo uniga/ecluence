@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Contains original work from EGit.
- * Copyright (c) 2017 Uniga.
+ * Copyright (c) 2017, 2018 Uniga.
  * Original work Copyright (c) 2007,2010 Robin Rosenberg and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0

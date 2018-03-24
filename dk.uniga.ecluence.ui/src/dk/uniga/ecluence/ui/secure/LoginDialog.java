@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Modified work Copyright (c) 2017, Uniga.
+ * Modified work Copyright (c) 2017, 2018, Uniga.
  * Original work Copyright (C) 2010, Jens Baumgart <jens.baumgart@sap.com>
  * Original work Copyright (C) 2010, Edwin Kempin <edwin.kempin@sap.com>
  *
