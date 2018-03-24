@@ -14,6 +14,6 @@ public class EventConstants {
 
 	public static final String REFRESH_DONE = "refreshDone";
 	public static final String CONNECTED_FACADE = "connectedFacade";
-	public static final String PAGE_SELECTED = "pageSelected";
+	public static final String USER_SELECTED_PAGE = "pageSelected";
 
 }

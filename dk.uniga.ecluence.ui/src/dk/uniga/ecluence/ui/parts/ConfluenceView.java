@@ -22,10 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.nls.Translation;
 import org.eclipse.e4.ui.di.Focus;
@@ -36,8 +32,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseAdapter;
@@ -53,18 +47,18 @@ import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
 import dk.uniga.ecluence.core.ConfluenceFacade;
 import dk.uniga.ecluence.core.ContentUpdateListener;
 import dk.uniga.ecluence.core.NotConnectedException;
-import dk.uniga.ecluence.core.QueryException;
 import dk.uniga.ecluence.core.cache.ContentCacheProvider;
 import dk.uniga.ecluence.core.matching.ContentMatch;
 import dk.uniga.ecluence.core.matching.ContentMatcherRegistry;
 import dk.uniga.ecluence.core.matching.SelectionSource;
 import dk.uniga.ecluence.ui.Activator;
 import dk.uniga.ecluence.ui.handlers.EventConstants;
+import dk.uniga.ecluence.ui.parts.SelectionMatcher.ContentMatchListener;
 import dk.uniga.ecluence.ui.parts.formatted.FormattedMatchFactoryImpl;
 
 /**
  * Eclipse view part that shows matching Confluence pages and shows the content
- * of the selected page (defaults to the first matching page).
+ * of the selected page.
  * 
  * Automatically connects to a new {@link ConfluenceFacade} if user connects to
  * a new Confluence location.
@@ -80,29 +74,30 @@ public final class ConfluenceView {
 	@Translation
 	private Messages messages;
 
+	private PageBrowser pageBrowser;
+	
+	private PageListViewer listViewer;
+	
+	private StatusLabel statusLabel;
+	
 	private ConfluenceFacade confluenceFacade;
 
-	private PageBrowser pageBrowser;
-
-	private PageListViewer listViewer;
-
+	private ViewUpdater viewUpdater;
+	
 	private EclipseSelectionContentMatcher selectionContentMatcher;
 
-	/** Last object matched by {@link #selectionContentMatcher} */
-	private Object currentSelection;
+	private final Consumer<ContentMatch> openCommand = (match) -> openPageInBrowser(match);
 	
-	private SelectionSource currentSelectionSource;
+	private final Consumer<ContentMatch> openExternalCommand = (match) -> openPageInExternalBrowser(match);
+	
+	private final Consumer<String> openWikiLinkExternalCommand = (string) -> openWikiLinkInExternalBrowser(string);
+	
+	private final ContentMatchListener contentMatchListener = (source, o, matches) -> matched(source, o, matches);
 
-	Consumer<ContentMatch> openCommand = (page) -> showPageAsync(page);
-	
-	Consumer<ContentMatch> openExternalCommand = (page) -> openPageInExternalBrowser(page);
-	
-	Consumer<String> openWikiLinkExternalCommand = (string) -> openWikiLinkInExternalBrowser(string);
-	
-	ContentUpdateListener contentCacheListener = pages -> refreshCurrentSelection();
+	private final ContentUpdateListener contentCacheListener = (pages) -> viewUpdater.refreshSelection();
 
-	private StatusLabel statusLabel;
-
+	private final Consumer<ContentBean> linkedPageListener = (page) -> viewUpdater.userSelectedPage(page);
+	
 	public ConfluenceView() {
 	}
 	
@@ -114,13 +109,23 @@ public final class ConfluenceView {
 		createComponents(sash);
 		sash.setWeights(new int[] { 20, 80 });
 		
-		ContentMatcherRegistry contentMatcherRegistry = dk.uniga.ecluence.core.Activator.getDefault().getContentMatcherRegistry();
-		selectionContentMatcher = new EclipseSelectionContentMatcher(contentMatcherRegistry, 
-				(source, o, matches) -> matched(source, o, matches), () -> getPreferenceStore());
-		
+		this.selectionContentMatcher = createSelectionMatcher();
+		this.viewUpdater = createViewUpdater();
 		this.confluenceFacade = dk.uniga.ecluence.core.Activator.getDefault().getConfluenceFacade();
 		
-		showIndexPages();
+		viewUpdater.refreshSelection();
+	}
+
+	private ViewUpdater createViewUpdater() {
+		return new ViewUpdater(selectionContentMatcher,
+				new ViewUpdateStrategy(pages -> updateListAsync(pages), pages -> selectMatchAsync(pages)));
+	}
+
+	private EclipseSelectionContentMatcher createSelectionMatcher() {
+		ContentMatcherRegistry contentMatcherRegistry = dk.uniga.ecluence.core.Activator.getDefault()
+				.getContentMatcherRegistry();
+		return new EclipseSelectionContentMatcher(contentMatcherRegistry, contentMatchListener,
+				() -> getPreferenceStore());
 	}
 
 	private void createComponents(final SashForm parent) {
@@ -129,6 +134,7 @@ public final class ConfluenceView {
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 		pageBrowser = new PageBrowserBuilder(() -> getConfluenceFacade(), openWikiLinkExternalCommand).build(composite);
 		pageBrowser.getComponent().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		pageBrowser.addLinkedPageListener(linkedPageListener);
 		statusLabel = new StatusLabel(composite);
 	}
 
@@ -145,11 +151,16 @@ public final class ConfluenceView {
 		selectionContentMatcher.close();
 	}
 
+	private void openPageInBrowser(ContentMatch match) { 
+		selectMatchAsync(match); 
+		viewUpdater.userSelectedPage(match.getContent()); 
+	}
+	
 	@Inject
 	@Optional
 	private void refresh(@UIEventTopic(EventConstants.REFRESH_DONE) Integer updates) {
 		log.debug("refresh with {} updates", updates);
-		refreshCurrentSelection();
+		viewUpdater.refreshSelection();
 	}
 
 	@Inject
@@ -157,7 +168,7 @@ public final class ConfluenceView {
 	private void connectedFacade(@UIEventTopic(EventConstants.CONNECTED_FACADE) ConfluenceFacade facade) {
 		log.debug("connected to {}", facade);
 		updateConfluenceFacade(facade);
-		update();
+		viewUpdater.refreshSelection();
 	}
 
 	/**
@@ -168,7 +179,7 @@ public final class ConfluenceView {
 	@Inject
 	@Optional
 	private void cacheAdded(@UIEventTopic(dk.uniga.ecluence.core.EventConstants.CONTENT_CACHE_ADDED) ContentCacheProvider provider) {
-		update();
+		viewUpdater.refreshSelection();
 	}
 	
 	/**
@@ -178,32 +189,21 @@ public final class ConfluenceView {
 	 */
 	@Inject
 	@Optional
-	private void pageSelected(@UIEventTopic(EventConstants.PAGE_SELECTED) ContentBean page) {
+	private void userSelectedPage(@UIEventTopic(EventConstants.USER_SELECTED_PAGE) ContentBean page) {
+		viewUpdater.userSelectedPage(page);
 		pageBrowser.showPage(page);
-	}
-	
-	private void update() {
-		if (currentSelection != null)
-			refreshCurrentSelection();
-		else
-			showIndexPages();
 	}
 	
 	@Inject
 	@Optional
 	private void exception(@UIEventTopic(dk.uniga.ecluence.core.EventConstants.EXCEPTION) Exception exception) {
 		log.error("Notified of exception", exception);
-		String message = exception.getMessage();
-		Throwable cause = exception.getCause();
-		String causeMessage = (cause != null) ? String.format("(%s: %s)", cause.getClass().getTypeName(), cause.getMessage()) : "";
-		String time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		statusLabel.setVisible(true);
-		statusLabel.setText(String.format("%s %s [%s]", message, causeMessage, time));
+		statusLabel.handleException(exception);
 	}
 	
 	private void updateConfluenceFacade(ConfluenceFacade facade) {
 		Objects.requireNonNull(facade);
-		log.debug("updateConfluenceFacade({}) existing: ", facade, this.confluenceFacade);
+		log.debug("updateConfluenceFacade({}) existing: {}", facade, this.confluenceFacade);
 		try {
 			if (this.confluenceFacade != null) {
 				this.confluenceFacade.removeContentListener(contentCacheListener);
@@ -218,40 +218,13 @@ public final class ConfluenceView {
 			Activator.handleError("Cannot register listener to ConfluenceFacade", e, false);
 		}
 	}
-	
-	protected void refreshCurrentSelection() {
-		if (currentSelection != null)
-			selectionContentMatcher.selectionChanged(currentSelectionSource, currentSelection);
-	}
 
 	protected void matched(final SelectionSource source, final Object o, final Collection<ContentMatch> pages) {
 		log.debug("matched {} pages to object {} from source {}", pages.size(), o.getClass().getSimpleName(), source);
-		currentSelectionSource = source;
-		currentSelection = o;
-		updateMatches(pages);
+		viewUpdater.updateMatches(source, o, pages);
 	}
 
-	private void showIndexPages() {
-		new Job("Retrieve index pages") {
-			@Override
-			protected IStatus run(IProgressMonitor arg0) {
-				try {
-					if (selectionContentMatcher != null)
-						updateMatches(selectionContentMatcher.getIndexPages());
-					return Status.OK_STATUS;
-				} catch (QueryException e) {
-					return Status.OK_STATUS;
-				}
-			}
-		}.schedule();
-	}
-
-	private void updateMatches(Collection<ContentMatch> pages) {
-		updateList(pages);
-		showFirstMatch(pages);
-	}
-
-	private void updateList(final Collection<ContentMatch> matches) {
+	private void updateListAsync(final Collection<ContentMatch> matches) {
 		synchronize.asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -260,33 +233,19 @@ public final class ConfluenceView {
 		});
 	}
 
-	protected void showFirstMatch(final Collection<ContentMatch> matches) {
-		if (!matches.isEmpty()) {
-			showPageAsync(matches.iterator().next());
-		}
-	}
-
-	private void showPageAsync(ContentMatch match) {
-		log.debug("showPageAsync {}", match);
+	private void selectMatchAsync(ContentMatch match) {
+		log.debug("selectMatchAsync {}", match);
 		synchronize.asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				selectPageInList(match);
+				listViewer.selectPage(match);
 				pageBrowser.showPage(match.getContent());
 			}
 		});
 	}
 
-	private void selectPageInList(ContentMatch match) {
-		TableViewer viewer = listViewer.getViewer();
-		if (viewer.getStructuredSelection().isEmpty()) {
-			log.debug("selectPageInList: {}", match);
-			viewer.setSelection(new StructuredSelection(match), true);
-		}
-	}
-
-	private void openPageInExternalBrowser(ContentMatch page) {
-		openWikiLinkInExternalBrowser(page.getContent().getLinks().getWebui());
+	private void openPageInExternalBrowser(ContentMatch match) {
+		openWikiLinkInExternalBrowser(match.getContent().getLinks().getWebui());
 	}
 
 	private void openWikiLinkInExternalBrowser(String link) {
@@ -328,7 +287,7 @@ public final class ConfluenceView {
 //			selectionContentMatcher.setSelection(s);
 	}
 
-	private class StatusLabel {
+	private final class StatusLabel {
 
 		private final Label label;
 		private final GridData data;
@@ -339,6 +298,15 @@ public final class ConfluenceView {
 			label.setLayoutData(data);
 			setVisible(false);
 			addClickToClose();
+		}
+
+		public void handleException(Exception exception) {
+			String message = exception.getMessage();
+			Throwable cause = exception.getCause();
+			String causeMessage = (cause != null) ? String.format("(%s: %s)", cause.getClass().getTypeName(), cause.getMessage()) : "";
+			String time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+			setVisible(true);
+			setText(String.format("%s %s [%s]", message, causeMessage, time));
 		}
 
 		private void addClickToClose() {
@@ -356,7 +324,7 @@ public final class ConfluenceView {
 			label.getParent().layout(true, true);
 		}
 
-		public void setText(String text) {
+		protected void setText(String text) {
 			label.setText(text);
 		}
 		

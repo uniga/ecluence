@@ -24,6 +24,7 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -155,11 +156,14 @@ public final class PageListViewer {
 		});
 	}
 
-	public TableViewer getViewer() {
-		return viewer;
-	}
-
 	private StyledText getFormattedMatchExplanation(ContentMatch match) {
 		return formattedMatchFactory.createFormattedMatch(match);
+	}
+
+	public void selectPage(ContentMatch match) {
+		if (viewer.getStructuredSelection().isEmpty()) {
+			log.debug("selectPageInList: {}", match);
+			viewer.setSelection(new StructuredSelection(match), true);
+		}
 	}
 }

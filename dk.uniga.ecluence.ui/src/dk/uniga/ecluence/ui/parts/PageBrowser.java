@@ -13,6 +13,7 @@ package dk.uniga.ecluence.ui.parts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -71,6 +72,8 @@ public final class PageBrowser {
 		}
 	};
 
+	private Consumer<ContentBean> linkedPageListener;
+
 	public PageBrowser(Composite parent, Supplier<ConfluenceFacade> facadeSupplier, PageContentRenderer renderer) {
 		this.facadeSupplier = facadeSupplier;
 		this.pageRenderer = renderer;
@@ -78,6 +81,16 @@ public final class PageBrowser {
 		addLinkHandler(this::handlePageLink);
 	}
 
+	/**
+	 * Adds a listener to be notified when a page link has been clicked.
+	 * 
+	 * @param linkedPageListener
+	 *            consumer to accept a ContentBean when it gets shown in the browser
+	 */
+	public void addLinkedPageListener(Consumer<ContentBean> linkedPageListener) {
+		this.linkedPageListener = linkedPageListener;
+	}
+	
 	/**
 	 * Adds a LinkHandler to handle links in the page that are clicked. Handlers are
 	 * called in the order they have been added, until the
@@ -146,8 +159,10 @@ public final class PageBrowser {
 					log.debug("getPageById({})", contentId);
 					ContentBean page = getConfluenceFacade().getPageById(contentId);
 					log.debug("page loaded {}", page.getId());
-					if (page != null)
+					if (page != null) {
 						showPage(page);
+						linkedPageListener.accept(page);
+					}
 				} catch (QueryException e) {
 					Activator.handleError("Exception retrieving page " + contentId, e, false);
 				}

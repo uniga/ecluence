@@ -61,7 +61,7 @@ public class ListPages {
 			public void run() {
 				if (dialog.open() == Window.OK) {
 					IEventBroker eventBroker = Activator.getDefault().getEventBroker();
-					eventBroker.post(EventConstants.PAGE_SELECTED, dialog.getResult()[0]);
+					eventBroker.post(EventConstants.USER_SELECTED_PAGE, dialog.getResult()[0]);
 				}
 			}
 		});
