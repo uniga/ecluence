@@ -106,9 +106,10 @@ public class JavaEditorSelectionAdapter extends BaseSelectionSource implements E
 			ICompilationUnit cu = (ICompilationUnit) input;
 			try {
 				IJavaElement element = cu.getElementAt(position);
-				if (element != null)
+				if (element != null) {
 					notifySelectionChanged(this, element);
-				log.debug("updatedPosition({}) found element: {} {}", element.getPath(), element.getElementName());
+					log.debug("updatedPosition({}) found element: {} {}", element.getPath(), element.getElementName());
+				}
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
