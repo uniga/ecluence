@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import dk.uniga.ecluence.core.AttachmentDownloader.AttachmentJob;
 import dk.uniga.ecluence.core.ImageAttachmentExtractor.ImageLink;
 import dk.uniga.ecluence.core.PageContent.Listener;
-import dk.uniga.ecluence.core.PageContent.PageKey;
 
 public final class PageAttachmentProvider {
 

@@ -18,9 +18,9 @@ import java.util.Objects;
 
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
 import dk.uniga.ecluence.core.PageContent;
-import dk.uniga.ecluence.core.PageContent.PageKey;
 import dk.uniga.ecluence.core.PageContentProcessingException;
 import dk.uniga.ecluence.core.PageContentProcessor;
+import dk.uniga.ecluence.core.PageKey;
 import dk.uniga.ecluence.ui.Activator;
 
 public class PageContentRenderer {
@@ -59,14 +59,15 @@ public class PageContentRenderer {
 	}
 
 	private PageContent getPageContent(ContentBean page) {
-		PageContent pageContent = pageContents.get(PageContent.createKey(page));
+		PageContent pageContent = pageContents.get(PageKey.createKey(page));
 		return (pageContent != null) ? pageContent : createPageContent(page);
 	}
 
 	private PageContent createPageContent(ContentBean page) {
-		PageContent rendered = new PageContent(page);
+		PageKey key = PageKey.createKey(page);
+		PageContent rendered = new PageContent(page, key);
 		rendered.setContent(formatter.formatContent(page));
-		pageContents.put(PageContent.createKey(page), rendered);
+		pageContents.put(key, rendered);
 		return rendered;
 	}
 }

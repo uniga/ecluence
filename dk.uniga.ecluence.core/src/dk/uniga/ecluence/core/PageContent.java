@@ -24,9 +24,9 @@ public class PageContent {
 
 	private final Set<Listener> listeners = new HashSet<>();
 	
-	public PageContent(ContentBean page) {
+	public PageContent(ContentBean page, PageKey key) {
 		this.page = Objects.requireNonNull(page);
-		this.key = new PageKey(page);
+		this.key = key;
 	}
 	
 	public PageKey getKey() {
@@ -56,37 +56,6 @@ public class PageContent {
 	
 	public void close() {
 		listeners.forEach((l) -> l.closed(this));
-	}
-	
-	public static PageKey createKey(ContentBean page) {
-		return new PageKey(page);
-	}
-	
-	public static class PageKey {
-		
-		private final String key;
-		
-		private PageKey(ContentBean page) {
-			key = String.format("%s : %s", page.getId(), page.getHistory().getCreatedDate().toString());
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof PageKey) {
-				return ((PageKey) obj).key.equals(key);
-			}
-			return false;
-		}
-		
-		@Override
-		public int hashCode() {
-			return Objects.hash(key);
-		}
-		
-		@Override
-		public String toString() {
-			return "PageKey[" + key + "]";
-		}
 	}
 	
 	public interface Listener {
