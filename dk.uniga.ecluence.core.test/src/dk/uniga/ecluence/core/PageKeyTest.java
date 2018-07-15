@@ -1,6 +1,5 @@
 package dk.uniga.ecluence.core;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,10 +49,8 @@ public class PageKeyTest {
 		Date date = new Date();
 		PageKey key1 = PageKey.createKey(createPage("1", date));
 		PageKey key2 = PageKey.createKey(createPage("1", date));
-		assertTrue(key1.equals(key2));
-		int hashCode = key1.hashCode();
-		assertEquals(hashCode, key2.hashCode());
-		assertEquals(hashCode, key1.hashCode()); // must remain unchanged
+	    assertTrue(key1.equals(key2) && key2.equals(key1));
+	    assertTrue(key1.hashCode() == key2.hashCode());
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
