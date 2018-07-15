@@ -51,6 +51,9 @@ public class IdentifierLabelContentMatcherTest {
 
 	@Mock
 	SelectionDescription selectionDescription;
+	
+	@Mock
+	MatchExplanation explanation;
 
 	@Before
 	public void setup() {
@@ -110,6 +113,8 @@ public class IdentifierLabelContentMatcherTest {
 			when(contentProvider.getPages()).thenReturn(getMockContentCollection());
 			when(predicateFactory.getPredicate(eq(predicate))).thenReturn(matchPredicate);
 			when(matchPredicate.test(any(ContentBean.class))).thenReturn(true);
+			
+			when(matchPredicate.getMatchExplanation(any(SelectionDescription.class), any(ContentBean.class))).thenReturn(explanation);
 	
 			IdentifierLabelContentMatcher handler = new IdentifierLabelContentMatcher(() -> contentProvider, predicate,
 					predicateFactory, identifierProvider);
