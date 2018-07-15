@@ -4,7 +4,7 @@ Bundle-Name: Confluence-rest-client
 Bundle-SymbolicName: de.itboehmer.confluence-rest-client
 Bundle-Version: 1.0.6.qualifier
 Bundle-ClassPath: .,
- confluence-rest-client-0.8.4-SNAPSHOT.jar
+ confluence-rest-client-1.0.0-SNAPSHOT.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: 
  de.itboehmer.confluence.rest.client,
@@ -24,7 +24,6 @@ Require-Bundle: org.apache.commons.logging;bundle-version="1.1.1";visibility:=re
  org.apache.commons.codec;bundle-version="1.9.0",
  org.apache.commons.lang3;bundle-version="3.1.0",
  org.apache.commons.io;bundle-version="2.2.0",
- org.apache.commons.collections;bundle-version="3.2.2",
  org.apache.httpcomponents.httpclient;bundle-version="4.5.2",
  org.apache.httpcomponents.httpcore;bundle-version="4.4.6",
  com.google.gson;bundle-version="2.7.0"
