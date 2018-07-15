@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -64,9 +65,9 @@ public class ConfluenceFacadeImpl implements ConfluenceFacade {
 	private ContentCacheRegistry contentCacheRegistry;
 
 	public ConfluenceFacadeImpl(Executor executor, IPath stateLocation, Consumer<ContentCacheProvider> cacheAddedCallback) {
-		this.executor = executor;
-		this.stateLocation = stateLocation;
-		this.cacheAddedCallback = cacheAddedCallback;
+		this.executor = Objects.requireNonNull(executor);
+		this.stateLocation = Objects.requireNonNull(stateLocation);
+		this.cacheAddedCallback = Objects.requireNonNull(cacheAddedCallback);
 	}
 
 	public void connect(APIAuthConfig authProps)
