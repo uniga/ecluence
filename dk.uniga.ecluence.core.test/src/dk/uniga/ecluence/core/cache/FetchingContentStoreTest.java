@@ -19,6 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
+import de.itboehmer.confluence.rest.core.domain.cql.SearchResultEntry;
 import dk.uniga.ecluence.core.ContentUpdateListener;
 import dk.uniga.ecluence.core.QueryException;
 
@@ -129,17 +131,18 @@ public class FetchingContentStoreTest {
 	}
 
 	private int fetchOneExpandedPage(FetchingContentStore store, boolean arg) throws QueryException, ContentStoreException {
-		doAnswer(fetchAnswer(Arrays.asList(page1))).when(contentFetcher).fetch(eq(arg), any());
+		doAnswer(fetchAnswer(Arrays.asList(new SearchResultEntry(page1, LocalDateTime.now())))).when(contentFetcher)
+				.fetch(eq(arg), any());
 		when(contentExpander.expand(page1)).thenReturn(expandedPage1);
 		when(page1.getId()).thenReturn("1");
 		return store.fetch(arg);
 	}
 
-	private Answer<Integer> fetchAnswer(List<ContentBean> result) {
+	private Answer<Integer> fetchAnswer(List<SearchResultEntry> result) {
 		return new Answer<Integer>() {
 			@Override
 			public Integer answer(InvocationOnMock invocation) throws Throwable {
-				Consumer<List<ContentBean>> consumer = invocation.getArgument(1);
+				Consumer<List<SearchResultEntry>> consumer = invocation.getArgument(1);
 				consumer.accept(result);
 				return result.size();
 			}

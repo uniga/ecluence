@@ -63,7 +63,7 @@ public class ContentStoreImplTest {
 	@Test
 	public void testPutBean() throws Exception {
 		directoryPath = createTestDirectory();
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		store.putContent(new ContentBean("1"));
 		assertTrue(Files.exists(new File(directoryPath, "content-1.json").toPath()));
 	}
@@ -71,7 +71,7 @@ public class ContentStoreImplTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testPutBeanNoId() throws Exception {
 		directoryPath = createTestDirectory();
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		store.putContent(new ContentBean(null));
 	}
 	
@@ -85,7 +85,7 @@ public class ContentStoreImplTest {
 	@Test
 	public void testGetEmpty() throws Exception {
 		directoryPath = createTestDirectory();
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		assertTrue(store.getAll().isEmpty());
 	}
 
@@ -93,7 +93,7 @@ public class ContentStoreImplTest {
 	public void testGetOne() throws Exception {
 		directoryPath = createTestDirectory();
 		FileUtils.write(new File(directoryPath, "content-2097153.json"), CONTENT_JSON);
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		assertEquals("2097153", store.getAll().iterator().next().getId());
 	}
 
@@ -101,7 +101,7 @@ public class ContentStoreImplTest {
 	public void testGetOneInvalid() throws Exception {
 		directoryPath = createTestDirectory();
 		FileUtils.write(new File(directoryPath, "content-2097153.json"), INVALID_JSON);
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		store.getAll();
 	}
 
@@ -111,7 +111,7 @@ public class ContentStoreImplTest {
 		File file = new File(directoryPath, "content-2097153.json");
 		FileUtils.write(file, CONTENT_JSON);
 		file.setReadable(false, false);
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		store.getAll();
 	}
 
@@ -119,7 +119,7 @@ public class ContentStoreImplTest {
 	public void testGetById() throws Exception {
 		directoryPath = createTestDirectory();
 		FileUtils.write(new File(directoryPath, "content-2097153.json"), CONTENT_JSON);
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		assertTrue(store.get("2097153").isPresent());
 		assertEquals("2097153", store.get("2097153").get().getId());
 	}
@@ -128,7 +128,7 @@ public class ContentStoreImplTest {
 	public void testGetByIdUnknown() throws Exception {
 		directoryPath = createTestDirectory();
 		FileUtils.write(new File(directoryPath, "content-2097153.json"), CONTENT_JSON);
-		ContentStore store = new ContentStoreImpl(directoryPath);
+		ContentStoreImpl store = new ContentStoreImpl(directoryPath);
 		assertFalse(store.get("1").isPresent());
 	}
 
