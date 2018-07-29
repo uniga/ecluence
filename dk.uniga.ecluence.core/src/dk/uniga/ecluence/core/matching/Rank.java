@@ -29,6 +29,10 @@ public final class Rank implements Comparable<Rank> {
 		this.level = level;
 	}
 	
+	public int getLevel() {
+		return level;
+	}
+	
 	@Override
 	public int compareTo(Rank o) {
 		if (o == null)

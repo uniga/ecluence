@@ -10,6 +10,8 @@
  *******************************************************************************/
 package dk.uniga.ecluence.core.matching;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Supplier;
@@ -21,7 +23,7 @@ public final class IndexPageMatcherProvider extends AbstractContentMatcherProvid
 	private final String label;
 
 	public IndexPageMatcherProvider(String label) {
-		this.label = label;
+		this.label = requireNonNull(label);
 	}
 
 	@Override

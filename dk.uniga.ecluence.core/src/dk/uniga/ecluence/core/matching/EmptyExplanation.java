@@ -15,4 +15,8 @@ public class EmptyExplanation implements MatchExplanation {
 	public String getDefaultText() {
 		return "";
 	}
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof EmptyExplanation;
+	}
 }

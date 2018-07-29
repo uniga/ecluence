@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.itboehmer.confluence.rest.core.domain.content.ContentBean;
 import dk.uniga.ecluence.core.MatchLabelsContentBeanPredicate;
 import dk.uniga.ecluence.core.MatchLabelsContentBeanPredicateFactory;
 import dk.uniga.ecluence.core.QueryException;
@@ -67,18 +69,29 @@ public class MultipleIdentifierBasedContentMatcher implements ContentMatcher {
 		List<ContentMatch> matches = new ArrayList<>();
 		ContentProvider contentProvider = contentProviderSupplier.get();
 		if (contentProvider != null) {
-			Collection<IdentifierProvider> providers = identifierProvider.getIdentifierProviders(o);
-			contentProvider.getPages().stream().forEach((page) -> {
-				for (IdentifierProvider provider : providers) {
-					identifierPredicate.setIdentifier(provider.getIdentifier(o).get());
-					MatchLabelsContentBeanPredicate p = predicateFactory.getPredicate(identifierPredicate);
-					if (p.test(page))
-						matches.add(new ContentMatch(page,
-								p.getMatchExplanation(provider.getSelectionDescription(o).get(), page)));
-				}
+			contentProvider.getPages().stream().forEach((ContentBean page) -> {
+				matchPage(o, matches, page).ifPresent((ContentMatch match) -> {
+					matches.add(match);
+				});
 			});
 		}
 		return matches;
+	}
+
+	private Optional<ContentMatch> matchPage(Object o, List<ContentMatch> matches, ContentBean page) {
+		for (IdentifierProvider provider : identifierProvider.getIdentifierProviders(o)) {
+			Optional<String> identifier = provider.getIdentifier(o);
+			if (identifier.isPresent()) {
+				identifierPredicate.setIdentifier(identifier.get());
+				MatchLabelsContentBeanPredicate p = predicateFactory.getPredicate(identifierPredicate);
+				if (p.test(page)) {
+					ContentMatch match = new ContentMatch(page,
+							p.getMatchExplanation(provider.getSelectionDescription(o).get(), page));
+					return Optional.of(match);
+				}
+			};
+		}
+		return Optional.empty();
 	}
 
 	@Override

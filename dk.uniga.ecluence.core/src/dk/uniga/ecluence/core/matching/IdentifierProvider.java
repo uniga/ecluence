@@ -26,8 +26,11 @@ public interface IdentifierProvider {
 
 	/**
 	 * Returns a description of the given object if it can be identified.
+	 * 
 	 * @param o
-	 * @return
+	 * @return Optional {@link SelectionDescription} which is guaranteed present if
+	 *         {@link #getIdentifier(Object)} return value is present for the same
+	 *         argument
 	 */
 	Optional<SelectionDescription> getSelectionDescription(Object o);
 

@@ -107,27 +107,36 @@ public class IdentifierLabelContentMatcherTest {
 	}
 
 	@Test
-		public void testGetMatchesObject() throws Exception {
-			when(identifierProvider.getIdentifier(any())).thenReturn(Optional.of("name"));
-			when(identifierProvider.getSelectionDescription(any())).thenReturn(Optional.of(selectionDescription));
-			when(contentProvider.getPages()).thenReturn(getMockContentCollection());
-			when(predicateFactory.getPredicate(eq(predicate))).thenReturn(matchPredicate);
-			when(matchPredicate.test(any(ContentBean.class))).thenReturn(true);
-			
-			when(matchPredicate.getMatchExplanation(any(SelectionDescription.class), any(ContentBean.class))).thenReturn(explanation);
-	
-			IdentifierLabelContentMatcher handler = new IdentifierLabelContentMatcher(() -> contentProvider, predicate,
-					predicateFactory, identifierProvider);
-			Collection<ContentMatch> result = handler.getMatches("o");
-			assertEquals(2, result.size());
-	
-			verify(identifierProvider).getIdentifier(eq("o"));
-			verify(identifierProvider).getSelectionDescription(eq("o"));
-			verify(predicateFactory).getPredicate(predicate);
-			verify(matchPredicate, times(2)).test(any(ContentBean.class));
-		}
+	public void testGetMatchesObject() throws Exception {
+		when(identifierProvider.getIdentifier(any())).thenReturn(Optional.of("name"));
+		when(identifierProvider.getSelectionDescription(any())).thenReturn(Optional.of(selectionDescription));
+		when(contentProvider.getPages()).thenReturn(getMockContentCollection());
+		when(predicateFactory.getPredicate(eq(predicate))).thenReturn(matchPredicate);
+		when(matchPredicate.test(any(ContentBean.class))).thenReturn(true);
+		
+		when(matchPredicate.getMatchExplanation(any(SelectionDescription.class), any(ContentBean.class)))
+				.thenReturn(explanation);
+
+		IdentifierLabelContentMatcher handler = new IdentifierLabelContentMatcher(() -> contentProvider, predicate,
+				predicateFactory, identifierProvider);
+		Collection<ContentMatch> result = handler.getMatches("o");
+		assertEquals(2, result.size());
+
+		verify(identifierProvider).getIdentifier(eq("o"));
+		verify(identifierProvider).getSelectionDescription(eq("o"));
+		verify(predicateFactory).getPredicate(predicate);
+		verify(matchPredicate, times(2)).test(any(ContentBean.class));
+	}
 
 	private Collection<ContentBean> getMockContentCollection() {
 		return Arrays.asList(new ContentBean("a"), new ContentBean("b"));
+	}
+
+	@Test
+	public void testToStringContainsClassnameAndArguments() throws Exception {
+		String string = new IdentifierLabelContentMatcher(() -> contentProvider, predicate, predicateFactory, identifierProvider).toString();
+		assertTrue(string.contains(IdentifierLabelContentMatcher.class.getSimpleName()));
+		assertTrue(string.contains(identifierProvider.toString()));
+		assertTrue(string.contains(predicate.toString()));
 	}
 }
