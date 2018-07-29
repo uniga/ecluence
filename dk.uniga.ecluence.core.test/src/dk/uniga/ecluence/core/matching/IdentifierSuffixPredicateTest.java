@@ -15,51 +15,23 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import dk.uniga.ecluence.core.matching.IdentifierSuffixPredicate;
-
 public class IdentifierSuffixPredicateTest {
 
 	@Test(expected = NullPointerException.class)
-	public void testTestNullsuffix() throws Exception {
+	public void testNullPrefixFails() throws Exception {
 		new IdentifierSuffixPredicate(null);
 	}
 
-	@Test()
-	public void testTestNullString() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		assertFalse(p.test(null));
-	}
-
 	@Test
-	public void testTestNoMatchingSuffix() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		assertFalse(p.test("asuffix"));
-	}
-
-	@Test
-	public void testTestNoIdentifier() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		assertFalse(p.test("suffix"));
-	}
-
-	@Test
-	public void testTestMatchingSuffixMatchingIdentifier() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		p.setIdentifier("ab");
-		assertTrue(p.test("suffixb"));
-	}
-
-	@Test
-	public void testTestMatchingSuffixMatchingIdentifierSubstitution() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		p.setIdentifier("a//b");
-		assertTrue(p.test("suffix-b"));
-	}
-
-	@Test
-	public void testTestLabelMatchingSuffixNoMatchingIdentifier() throws Exception {
-		IdentifierSuffixPredicate p = new IdentifierSuffixPredicate("suffix");
-		p.setIdentifier("aa");
-		assertFalse(p.test("suffixb"));
+	public void testMatching() throws Exception {
+		// note that this matches a string with nothing but the prefix
+		assertTrue(new IdentifierSuffixPredicate("prefix").setIdentifier("abc").test("prefix"));
+		// matching is not case sensitive
+		assertTrue(new IdentifierSuffixPredicate("prefix").setIdentifier("abc").test("prefixC"));
+		// false if not matching prefix
+		assertFalse(new IdentifierSuffixPredicate("prefix").setIdentifier("123").test("prefix1"));
+		assertTrue(new IdentifierSuffixPredicate("prefix").setIdentifier("1./23").test("prefix23"));
+		// prefix characters do not get replaced
+		assertTrue(new IdentifierSuffixPredicate("a./b").setIdentifier("1./23").test("a./b3"));
 	}
 }
