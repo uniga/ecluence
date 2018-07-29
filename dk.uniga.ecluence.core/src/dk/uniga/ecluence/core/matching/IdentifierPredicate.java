@@ -17,6 +17,12 @@ import java.util.function.Predicate;
  */
 public interface IdentifierPredicate extends Predicate<String> {
 
-	void setIdentifier(String identifier);
+	/**
+	 * Sets identifier to match prefix.
+	 * 
+	 * @param identifier identifier to match or <code>null</code>
+	 * @return this {@link IdentifierPredicate}
+	 */
+	IdentifierPredicate setIdentifier(String identifier);
 	
 }

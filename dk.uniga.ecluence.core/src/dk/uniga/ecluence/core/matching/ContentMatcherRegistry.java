@@ -12,6 +12,7 @@ package dk.uniga.ecluence.core.matching;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ public class ContentMatcherRegistry implements ContentMatcherProvider {
 	 * @param provider
 	 */
 	public void addProvider(ContentMatcherProvider provider) {
-		providers.add(provider);
+		providers.add(Objects.requireNonNull(provider));
 	}
 	
 	/**
@@ -42,7 +43,7 @@ public class ContentMatcherRegistry implements ContentMatcherProvider {
 	 * @param provider
 	 */
 	public void removeProvider(ContentMatcherProvider provider) {
-		providers.remove(provider);
+		providers.remove(Objects.requireNonNull(provider));
 	}
 	
 	@Override

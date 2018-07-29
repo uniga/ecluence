@@ -21,7 +21,7 @@ public enum CacheContentType {
 	
 	private String id;
 
-	CacheContentType(String id) {
+	private CacheContentType(String id) {
 		this.id = id;
 	}
 	

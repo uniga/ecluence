@@ -12,6 +12,10 @@ package dk.uniga.ecluence.core.matching;
 
 import java.util.Comparator;
 
+/**
+ * Compares two {@link ContentMatch}es by their rank and compares their titles
+ * and id if equal rank.
+ */
 public class ContentMatchComparator implements Comparator<ContentMatch> {
 	
 	@Override

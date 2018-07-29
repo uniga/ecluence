@@ -10,8 +10,10 @@
  *******************************************************************************/
 package dk.uniga.ecluence.core.preferences;
 
-public class PreferenceConstants {
-
+public final class PreferenceConstants {
+	
+	private PreferenceConstants() {}
+	
 	public static final String PREFERENCES_STORE_SECURESTORE = "storeInSecureStore";
 
 	public static final String PREFERENCE_LOCATION_KEY_NAME = "confluenceSite";

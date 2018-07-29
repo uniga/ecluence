@@ -28,12 +28,13 @@ public abstract class AbstractContentMatcherProvider implements ContentMatcherPr
 	private Collection<ContentMatcher> contentMatchers;
 
 	public void setContentProviderSupplier(Supplier<ContentProvider> contentProviderSupplier) {
-		this.contentProviderSupplier = contentProviderSupplier;
+		this.contentProviderSupplier = Objects.requireNonNull(contentProviderSupplier);
 	}
-
+	
 	@Override
-	public Collection<ContentMatcher> getContentMatchers() {
-		Objects.requireNonNull(contentProviderSupplier);
+	public synchronized Collection<ContentMatcher> getContentMatchers() {
+		if (contentProviderSupplier == null)
+			throw new IllegalStateException("content provider supplier must be set");
 		if (contentMatchers == null)
 			contentMatchers = createContentMatchers(contentProviderSupplier);
 		return contentMatchers;
